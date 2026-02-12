@@ -8,12 +8,13 @@ class DatabaseManager:
     """
     def __init__(self, host="127.0.0.1", port=3306, user="root", password="your_password", database="hotel_booking_db"):
         self.db_config = {
-            "host": host,
-            "port": port,
-            "user": user,
-            "password": password,
-            "database": database
-        }
+    "host": "mysql.railway.internal",
+    "user": "root",
+    "password": "EseXahnZSfRpzysBNjzRPStescYkJBW",
+    "database": "railway",
+    "port": 3306
+}
+
         # Use your actual password here. It's 'root' based on your provided backend.py
         self.db_config["password"] = "root" 
 
@@ -209,4 +210,5 @@ if __name__ == "__main__":
 
 
     except Exception as e:
+
         print(f"An error occurred during backend testing: {e}")
