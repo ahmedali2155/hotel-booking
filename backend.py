@@ -4,12 +4,13 @@ from datetime import date
 class DatabaseManager:
     def __init__(self):
         self.db_config = {
-            "host": "mysql.railway.internal",
-            "port": 3306,
+            "host": "gondola.proxy.rlwy.net",
+            "port": 45012,
             "user": "root",
-            "password": "EseXahnZSfRpzysBNjzRPStescYkJBW",
+            "password": "ESexAhhZSrEpzysBNjzRPStescYKjBVw",
             "database": "railway"
-        }
+}
+
 
     def get_connection(self):
         return mysql.connector.connect(**self.db_config)
@@ -43,3 +44,4 @@ class DatabaseManager:
         return self.execute_query(
             "INSERT INTO CUSTOMER (Customer_Name) VALUES (%s)", (name,)
         )
+
