@@ -1,883 +1,123 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grand Palace Hotel Booking</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom styles for fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        /* Background image container style */
-        .background-image-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            /* Background image set dynamically by JavaScript */
-            background-size: cover; /* Ensures the image covers the entire container */
-            background-position: center; /* Centers the image */
-            background-repeat: no-repeat;
-            z-index: -1; /* Place it behind other content */
-            filter: brightness(0.7); /* Slightly darken the image for better text contrast */
-            transition: background-image 0.5s ease-in-out; /* Smooth transition for background image change */
-        }
-        .luxury-gold-button {
-            background-color: #DAA520; /* Goldenrod */
-            transition: background-color 0.3s ease;
-        }
-        .luxury-gold-button:hover {
-            background-color: #C0901A; /* Darker Goldenrod */
-        }
-        /* Custom focus ring color */
-        .ring-luxury-gold:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.5);
-        }
-        /* For the login icon */
-        .login-logo {
-            width: 80px; /* Adjust size as needed */
-            height: 80px;
-            object-fit: contain; /* Ensures the image scales properly */
-            margin-bottom: 1rem;
-        }
-        /* Styles for dynamic content areas */
-        .tab-content {
-            min-height: 400px; /* Ensure content area has a minimum height */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grand Palace Hotel Booking</title>
+<script src="https://cdn.tailwindcss.com"></script>
 
-        /* --- Floating Animation for Login Screen --- */
-        @keyframes floatAnimation {
-            0% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px); /* Move up 10px */
-            }
-            100% {
-                transform: translateY(0px);
-            }
-        }
-        .floating-element {
-            animation: floatAnimation 3s ease-in-out infinite alternate;
-        }
+<style>
+body{
+font-family:Arial;
+margin:0;
+padding:0;
+background:black;
+color:white;
+text-align:center;
+}
 
-        /* Styles for clickable hotel cards/items */
-        .hotel-item {
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
-        }
-        .hotel-item:hover {
-            background-color: rgba(255, 255, 255, 0.05); /* Light hover effect */
-        }
-    </style>
+.container{
+margin-top:80px;
+}
+
+input{
+padding:10px;
+margin:5px;
+border-radius:8px;
+border:none;
+width:200px;
+color:black;
+}
+
+button{
+background:#DAA520;
+padding:10px 20px;
+border-radius:10px;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+button:hover{
+background:#b8911a;
+}
+</style>
+
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <!-- Background Image Container -->
-    <div id="main-background" class="background-image-container"></div>
 
-    <!-- Login Screen Container -->
-    <div id="login-screen" class="w-full max-w-md bg-black/60 p-8 rounded-xl shadow-2xl transition-all duration-500 ease-in-out floating-element">
-        <div class="text-center mb-8">
-            <!-- New Logo -->
-            <img src="https://marketplace.canva.com/EAF1Ww405ZA/3/0/400w/canva-black-illustrated-lion-hotel-logo-FYQa2F46f1s.jpg" alt="Hotel Logo" class="login-logo mx-auto">
-            
-            <h1 class="text-3xl font-bold text-white mb-2">Grand Palace Hotel</h1>
-            <p class="text-lg text-gray-200">Booking System</p>
-            <p class="text-gray-300">Created By Ahmed Ali</p>
-            <p class="text-gray-300">Roll No: F23-0213 | Submitted to Mam Javeria Naz</p>
-            <p class="text-gray-300 mt-4">Welcome, please log in.</p>
-        </div>
+<body>
+
+<div class="container">
+
+<h1>Grand Palace Hotel</h1>
+
+<!-- LOGIN -->
+
+<div id="loginBox">
+<input id="username" placeholder="Username"><br>
+<input id="password" type="password" placeholder="Password"><br>
+<button onclick="login()">Login</button>
+<p id="msg"></p>
+</div>
+
+<!-- DASHBOARD -->
+
+<div id="dashboard" style="display:none">
+<h2>Dashboard Connected Successfully 🎉</h2>
+<p>Your Flask API is running on Render</p>
+<button onclick="loadHotels()">Test Database</button>
+<pre id="data"></pre>
+</div>
+
+</div>
+
+<script>
+
+/* AUTO DETECT LOCAL OR ONLINE */
+const API_BASE =
+(location.hostname==="127.0.0.1"||location.hostname==="localhost")
+?"http://127.0.0.1:5000"
+:location.origin;
+
+/* LOGIN */
+async function login(){
+const username=document.getElementById("username").value;
+const password=document.getElementById("password").value;
+
+try{
+const res=await fetch(`${API_BASE}/login`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({username,password})
+});
+
+const data=await res.json();
+
+if(data.success){
+document.getElementById("loginBox").style.display="none";
+document.getElementById("dashboard").style.display="block";
+}else{
+document.getElementById("msg").innerText="Wrong username or password";
+}
+
+}catch(e){
+document.getElementById("msg").innerText="Server not reachable";
+}
+}
+
+/* TEST DATABASE */
+async function loadHotels(){
+try{
+const res=await fetch(`${API_BASE}/hotels`);
+const data=await res.json();
+document.getElementById("data").innerText=JSON.stringify(data,null,2);
+}catch(e){
+document.getElementById("data").innerText="Database API not responding";
+}
+}
+
+</script>
 
-        <form id="login-form" class="space-y-6">
-            <div>
-                <label for="username" class="block text-gray-300 text-sm font-semibold mb-2">Username</label>
-                <input type="text" id="username" name="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold focus:border-transparent transition-all duration-200" placeholder="Enter username">
-            </div>
-            <div>
-                <label for="password" class="block text-gray-300 text-sm font-semibold mb-2">Password</label>
-                <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold focus:border-transparent transition-all duration-200" placeholder="Enter password">
-            </div>
-            <div id="login-error" class="text-red-400 text-sm text-center hidden">Invalid Username or Password. Please try again.</div>
-            <button type="submit" class="w-full luxury-gold-button text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:ring-opacity-75 transition-all duration-200">
-                Login
-            </button>
-        </form>
-    </div>
-
-    <!-- Main App Dashboard (Initially Hidden) -->
-    <div id="main-app" class="hidden w-full max-w-4xl bg-black/60 p-8 rounded-xl shadow-2xl transition-all duration-500 ease-in-out">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-white">Grand Palace Hotel Dashboard</h1>
-            <button id="logout-button" class="luxury-gold-button text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:ring-opacity-75 text-sm">
-                Logout
-            </button>
-        </div>
-        <p class="text-center text-gray-200 mb-8">You are successfully logged in! Use the tabs below to manage bookings.</p>
-
-        <!-- Navigation Tabs -->
-        <div class="border-b border-gray-700">
-            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                <a href="#" id="tab-hotels" class="tab-link border-luxury-gold text-luxury-gold whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Hotels</a>
-                <a href="#" id="tab-rooms" class="tab-link border-transparent text-gray-300 hover:text-gray-100 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Rooms</a>
-                <a href="#" id="tab-new-booking" class="tab-link border-transparent text-gray-300 hover:text-gray-100 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">New Booking</a>
-                <a href="#" id="tab-view-bookings" class="tab-link border-transparent text-gray-300 hover:text-gray-100 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">View Bookings</a>
-                <a href="#" id="tab-payments" class="tab-link border-transparent text-gray-300 hover:text-gray-100 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-sm">Payments</a>
-            </nav>
-        </div>
-
-        <div id="content-area" class="mt-8 p-4 bg-black/10 rounded-lg tab-content">
-            <!-- Content will be loaded dynamically here -->
-            <p class="text-gray-200 text-center">Select a tab above to view content.</p>
-        </div>
-
-        <div class="flex justify-between items-center mt-8 text-gray-300 text-sm">
-            <span>Created By : Ahmed Ali</span>
-            <span>Roll No: F23-0213</span>
-        </div>
-    </div>
-
-    <script>
-        const API_BASE_URL = 'http://127.0.0.1:5000'; // Flask API URL
-        // Image URLs for dynamic background
-        const DEFAULT_BACKGROUND_IMAGE_URL = 'url("https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=600")';
-        const GRAND_HYATT_ROOMS_BG_IMAGE_URL = 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJH0JG1_1oGPLXOWLJSdLkfg3S_UkS69sqBQ&s")';
-        const MOUNTAIN_VIEW_INN_ROOMS_BG_IMAGE_URL = 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEvX2yz3ScDq6dYbF9-6l0brPoAYjBhOLEhA&s")';
-        const SEASIDE_ESCAPE_ROOMS_BG_IMAGE_URL = 'url("https://secretescapes-web.imgix.net/filtercategory/31/a56d6c3d_4269_4fcb_8000_288fd13fbaae.jpg?w=600&h=400&fit=crop&crop=entropy&auto=format,compress")';
-        const CITY_CENTRAL_HOTEL_ROOMS_BG_IMAGE_URL = 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_6Oi0NDY83ubA-CzDJ_z5Z9uGUXyvn9IupQ&s")';
-        const LAKEVIEW_LODGE_ROOMS_BG_IMAGE_URL = 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6zBIGXK8NVDmXUseb1vIetXCBIyUXLQd64g&s")';
-        const SUNSET_RESORT_ROOMS_BG_IMAGE_URL = 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmf0RXERyPgb4rwhzhLYrWiMlr_lsBciAVEw&s")';
-
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('login-form');
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const loginError = document.getElementById('login-error');
-            const loginScreen = document.getElementById('login-screen');
-            const mainApp = document.getElementById('main-app');
-            const contentArea = document.getElementById('content-area');
-            const tabLinks = document.querySelectorAll('.tab-link');
-            const logoutButton = document.getElementById('logout-button');
-            const mainBackground = document.getElementById('main-background'); // Reference to the background div
-
-            let activeTab = 'hotels'; // Default active tab
-
-            // Set initial background image
-            mainBackground.style.backgroundImage = DEFAULT_BACKGROUND_IMAGE_URL;
-
-            // --- Logout Logic ---
-            logoutButton.addEventListener('click', function() {
-                if (confirm('Are you sure you want to log out?')) {
-                    // Reset UI to login screen
-                    mainApp.classList.remove('opacity-100', 'scale-100');
-                    mainApp.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
-                    
-                    // Change background image back to login image
-                    mainBackground.style.backgroundImage = DEFAULT_BACKGROUND_IMAGE_URL;
-
-                    setTimeout(() => {
-                        mainApp.classList.add('hidden');
-                        loginScreen.classList.remove('hidden');
-                        loginScreen.classList.add('opacity-100', 'scale-100', 'floating-element'); // Re-add floating animation
-                        usernameInput.value = ''; // Reset username to empty
-                        passwordInput.value = '';
-                        loginError.classList.add('hidden');
-                        usernameInput.focus();
-                        // Reset active tab visual (optional, but good for consistency)
-                        tabLinks.forEach(link => {
-                            link.classList.remove('border-luxury-gold', 'text-luxury-gold');
-                            link.classList.add('border-transparent', 'text-gray-300', 'hover:text-gray-100', 'hover:border-gray-500');
-                        });
-                        document.getElementById('tab-hotels').classList.add('border-luxury-gold', 'text-luxury-gold');
-                        document.getElementById('tab-hotels').classList.remove('border-transparent', 'text-gray-300', 'hover:text-gray-100', 'hover:border-gray-500');
-                        activeTab = 'hotels';
-                        contentArea.innerHTML = '<p class="text-gray-200 text-center">Select a tab above to view content.</p>'; // Clear content area
-                    }, 300);
-                }
-            });
-
-            // --- Login Form Logic ---
-            loginForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
-
-                const username = usernameInput.value;
-                const password = passwordInput.value;
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/login`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ username, password })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok && data.success) {
-                        loginError.classList.add('hidden');
-                        
-                        // Stop the floating animation immediately upon successful login
-                        loginScreen.classList.remove('floating-element'); 
-                        // Change background image to dashboard image
-                        mainBackground.style.backgroundImage = DEFAULT_BACKGROUND_IMAGE_URL;
-
-                        loginScreen.classList.remove('opacity-100', 'scale-100');
-                        loginScreen.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
-
-                        setTimeout(() => {
-                            loginScreen.classList.add('hidden');
-                            mainApp.classList.remove('hidden');
-                            mainApp.classList.add('opacity-100', 'scale-100');
-                            loadTabContent(activeTab); // Load default tab content on successful login
-                        }, 300);
-                    } else {
-                        loginError.textContent = data.message || "Invalid Username or Password. Please try again.";
-                        loginError.classList.remove('hidden');
-                        passwordInput.value = '';
-                        usernameInput.focus();
-                    }
-                } catch (error) {
-                    console.error('Login failed:', error);
-                    loginError.textContent = "Could not connect to the server (API not running?). Please try again later.";
-                    loginError.classList.remove('hidden');
-                }
-            });
-
-            // --- Tab Navigation Logic ---
-            tabLinks.forEach(tabLink => {
-                tabLink.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const targetTab = this.id.replace('tab-', '');
-                    
-                    // Always set dashboard background when switching main tabs
-                    mainBackground.style.backgroundImage = DEFAULT_BACKGROUND_IMAGE_URL;
-
-                    // Remove active class from all tabs
-                    tabLinks.forEach(link => {
-                        link.classList.remove('border-luxury-gold', 'text-luxury-gold');
-                        link.classList.add('border-transparent', 'text-gray-300', 'hover:text-gray-100', 'hover:border-gray-500'); /* Adjusted colors */
-                    });
-
-                    // Add active class to clicked tab
-                    this.classList.add('border-luxury-gold', 'text-luxury-gold');
-                    this.classList.remove('border-transparent', 'text-gray-300', 'hover:text-gray-100', 'hover:border-gray-500'); /* Adjusted colors */
-
-                    activeTab = targetTab;
-                    loadTabContent(activeTab);
-                });
-            });
-
-            // --- Function to Load Tab Content Dynamically ---
-            async function loadTabContent(tabName) {
-                contentArea.innerHTML = '<p class="text-center text-gray-200">Loading...</p>'; // Show loading indicator
-
-                if (tabName === 'hotels') {
-                    await loadHotels();
-                } else if (tabName === 'rooms') {
-                    await loadRooms();
-                } else if (tabName === 'new-booking') {
-                    renderNewBookingForm();
-                } else if (tabName === 'view-bookings') {
-                    await loadBookings();
-                } else if (tabName === 'payments') { // New tab
-                    await loadPayments();
-                }
-            }
-
-            // --- API Data Loading Functions ---
-            async function loadHotels() {
-                // Ensure dashboard background is set when returning to hotels list
-                mainBackground.style.backgroundImage = DEFAULT_BACKGROUND_IMAGE_URL;
-                try {
-                    const response = await fetch(`${API_BASE_URL}/hotels`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const hotels = await response.json();
-                    let html = `
-                        <h2 class="text-xl font-semibold text-gray-200 mb-4">Available Hotels</h2>
-                        <div class="flex space-x-4 mb-4">
-                            <button id="add-hotel-btn" class="luxury-gold-button text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg text-sm">Add New Hotel</button>
-                            <button id="remove-hotel-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md text-sm">Remove Hotel</button>
-                        </div>
-                    `;
-                    if (hotels.length > 0) {
-                        html += '<ul class="list-disc pl-5 space-y-2">';
-                        hotels.forEach(hotel => {
-                            // Add a data-hotel-id attribute for easy selection
-                            html += `<li class="text-gray-300 hotel-item" data-hotel-id="${hotel.id}">
-                                <strong>${hotel.name}</strong> (${hotel.star_rating}★) - ${hotel.address} - Contact: ${hotel.contact}
-                                <span class="text-gray-500 text-sm">(Click to view rooms)</span>
-                            </li>`;
-                        });
-                        html += '</ul>';
-                    } else {
-                        html += '<p class="text-gray-300">No hotels found.</p>';
-                    }
-                    contentArea.innerHTML = html;
-
-                    // Add event listeners after content is rendered
-                    document.getElementById('add-hotel-btn').addEventListener('click', renderAddHotelForm);
-                    document.getElementById('remove-hotel-btn').addEventListener('click', renderRemoveHotelForm);
-                    document.querySelectorAll('.hotel-item').forEach(item => {
-                        item.addEventListener('click', function() {
-                            const hotelId = this.dataset.hotelId;
-                            const hotelName = this.querySelector('strong').textContent.split('(')[0].trim();
-                            loadHotelRooms(hotelId, hotelName);
-                        });
-                    });
-
-                } catch (error) {
-                    contentArea.innerHTML = `<p class="text-red-400">Failed to load hotels: ${error.message}. Make sure the Flask API server is running at ${API_BASE_URL}.</p>`;
-                    console.error('Error loading hotels:', error);
-                }
-            }
-
-            // --- New Hotel Management Functions ---
-            function renderAddHotelForm() {
-                contentArea.innerHTML = `
-                    <h2 class="text-xl font-semibold text-gray-200 mb-4">Add New Hotel</h2>
-                    <form id="add-hotel-form" class="space-y-4">
-                        <div>
-                            <label for="hotelName" class="block text-gray-300 text-sm font-semibold mb-2">Hotel Name</label>
-                            <input type="text" id="hotelName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., Grand Palace Hotel">
-                        </div>
-                        <div>
-                            <label for="hotelAddress" class="block text-gray-300 text-sm font-semibold mb-2">Address</label>
-                            <input type="text" id="hotelAddress" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., 123 Main St">
-                        </div>
-                        <div>
-                            <label for="starRating" class="block text-gray-300 text-sm font-semibold mb-2">Star Rating (1-5)</label>
-                            <input type="number" id="starRating" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" min="1" max="5" placeholder="e.g., 5">
-                        </div>
-                        <div>
-                            <label for="contactNumber" class="block text-gray-300 text-sm font-semibold mb-2">Contact Number</label>
-                            <input type="text" id="contactNumber" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., +1234567890">
-                        </div>
-                        <div>
-                            <label for="email" class="block text-gray-300 text-sm font-semibold mb-2">Email</label>
-                            <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., info@hotel.com">
-                        </div>
-                        <div>
-                            <label for="website" class="block text-gray-300 text-sm font-semibold mb-2">Website</label>
-                            <input type="url" id="website" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., www.hotel.com">
-                        </div>
-                        <div>
-                            <label for="description" class="block text-gray-300 text-sm font-semibold mb-2">Description</label>
-                            <textarea id="description" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" rows="3" placeholder="A brief description of the hotel"></textarea>
-                        </div>
-                        <div>
-                            <label for="amenities" class="block text-gray-300 text-sm font-semibold mb-2">Amenities (comma-separated)</label>
-                            <input type="text" id="amenities" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., Wi-Fi, Pool, Gym">
-                        </div>
-                        <div id="add-hotel-error" class="text-red-400 text-sm text-center hidden"></div>
-                        <button type="submit" class="w-full luxury-gold-button text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:ring-opacity-75">
-                            Add Hotel
-                        </button>
-                    </form>
-                `;
-                document.getElementById('add-hotel-form').addEventListener('submit', handleAddHotelSubmit);
-            }
-
-            async function handleAddHotelSubmit(event) {
-                event.preventDefault();
-                const form = event.target;
-                const errorDiv = document.getElementById('add-hotel-error');
-                errorDiv.classList.add('hidden');
-
-                const hotelData = {
-                    name: form.elements.hotelName.value.trim(),
-                    address: form.elements.hotelAddress.value.trim(),
-                    star_rating: parseInt(form.elements.starRating.value),
-                    contact_number: form.elements.contactNumber.value.trim(),
-                    email: form.elements.email.value.trim(),
-                    website: form.elements.website.value.trim(),
-                    description: form.elements.description.value.trim(),
-                    amenities: form.elements.amenities.value.trim()
-                };
-
-                if (!hotelData.name || !hotelData.address || isNaN(hotelData.star_rating) || hotelData.star_rating < 1 || hotelData.star_rating > 5 || !hotelData.contact_number) {
-                    errorDiv.textContent = "Please fill in all required fields (Name, Address, valid Star Rating, Contact Number).";
-                    errorDiv.classList.remove('hidden');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/hotels/add`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(hotelData)
-                    });
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                        alert(`Hotel '${hotelData.name}' added successfully!`);
-                        form.reset();
-                        loadTabContent('hotels'); // Refresh hotels list
-                    } else {
-                        errorDiv.textContent = result.error || "Failed to add hotel.";
-                        errorDiv.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    console.error('Error adding hotel:', error);
-                    errorDiv.textContent = "Could not connect to the server or an unknown error occurred.";
-                    errorDiv.classList.remove('hidden');
-                }
-            }
-
-            async function renderRemoveHotelForm() {
-                contentArea.innerHTML = `
-                    <h2 class="text-xl font-semibold text-gray-200 mb-4">Remove Hotel</h2>
-                    <form id="remove-hotel-form" class="space-y-4">
-                        <div>
-                            <label for="removeHotelId" class="block text-gray-300 text-sm font-semibold mb-2">Hotel ID to Remove</label>
-                            <input type="number" id="removeHotelId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="Enter Hotel ID">
-                        </div>
-                        <div id="remove-hotel-error" class="text-red-400 text-sm text-center hidden"></div>
-                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md">
-                            Remove Hotel
-                        </button>
-                    </form>
-                `;
-                document.getElementById('remove-hotel-form').addEventListener('submit', handleRemoveHotelSubmit);
-            }
-
-            async function handleRemoveHotelSubmit(event) {
-                event.preventDefault();
-                const form = event.target;
-                const errorDiv = document.getElementById('remove-hotel-error');
-                errorDiv.classList.add('hidden');
-
-                const hotelId = parseInt(form.elements.removeHotelId.value);
-
-                if (isNaN(hotelId) || hotelId <= 0) {
-                    errorDiv.textContent = "Please enter a valid Hotel ID.";
-                    errorDiv.classList.remove('hidden');
-                    return;
-                }
-
-                if (!confirm(`Are you sure you want to remove Hotel ID ${hotelId}? This action cannot be undone and will remove associated rooms and bookings!`)) {
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/hotels/remove/${hotelId}`, {
-                        method: 'DELETE'
-                    });
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                        alert(`Hotel ID ${hotelId} removed successfully!`);
-                        form.reset();
-                        loadTabContent('hotels'); // Refresh hotels list
-                    } else {
-                        errorDiv.textContent = result.error || "Failed to remove hotel. It might not exist or there's a database issue.";
-                        errorDiv.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    console.error('Error removing hotel:', error);
-                    errorDiv.textContent = "Could not connect to the server or an unknown error occurred.";
-                    errorDiv.classList.remove('hidden');
-                }
-            }
-            
-            async function loadHotelRooms(hotelId, hotelName) {
-                // Change background image based on hotelId
-                if (hotelId == 1) { // Assuming "The Grand Hyatt" has Hotel_ID = 1
-                    mainBackground.style.backgroundImage = GRAND_HYATT_ROOMS_BG_IMAGE_URL;
-                } else if (hotelId == 2) { // Assuming "Mountain View Inn" has Hotel_ID = 2
-                    mainBackground.style.backgroundImage = MOUNTAIN_VIEW_INN_ROOMS_BG_IMAGE_URL;
-                } else if (hotelId == 3) { // Assuming "Seaside Escape" has Hotel_ID = 3
-                    mainBackground.style.backgroundImage = SEASIDE_ESCAPE_ROOMS_BG_IMAGE_URL;
-                } else if (hotelId == 4) { // Assuming "City Central Hotel" has Hotel_ID = 4
-                    mainBackground.style.backgroundImage = CITY_CENTRAL_HOTEL_ROOMS_BG_IMAGE_URL;
-                } else if (hotelId == 5) { // Assuming "Lakeview Lodge" has Hotel_ID = 5
-                    mainBackground.style.backgroundImage = LAKEVIEW_LODGE_ROOMS_BG_IMAGE_URL;
-                } else if (hotelId == 6) { // Assuming "Sunset Resort" has Hotel_ID = 6
-                    mainBackground.style.backgroundImage = SUNSET_RESORT_ROOMS_BG_IMAGE_URL;
-                }
-                else {
-                    // For other hotels, keep the default background
-                    mainBackground.style.backgroundImage = DEFAULT_BACKGROUND_IMAGE_URL;
-                }
-
-                contentArea.innerHTML = `<p class="text-center text-gray-200">Loading rooms for ${hotelName}...</p>`;
-                try {
-                    const response = await fetch(`${API_BASE_URL}/hotels/${hotelId}/rooms`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const rooms = await response.json();
-                    let html = `
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-semibold text-gray-200">Rooms for ${hotelName} (ID: ${hotelId})</h2>
-                            <button id="back-to-hotels-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-md text-sm">
-                                &larr; Back to Hotels
-                            </button>
-                        </div>
-                        <div class="flex space-x-4 mb-4">
-                            <button id="add-room-to-hotel-btn" class="luxury-gold-button text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg text-sm" data-hotel-id="${hotelId}">Add New Room</button>
-                        </div>
-                    `;
-                    if (rooms.length > 0) {
-                        html += '<ul class="list-disc pl-5 space-y-2">';
-                        rooms.forEach(room => {
-                            html += `<li class="text-gray-300"><strong>Room ${room.number}</strong> (Floor: ${room.floor}) - ID: ${room.id}</li>`;
-                        });
-                        html += '</ul>';
-                    } else {
-                        html += `<p class="text-gray-300">No rooms found for ${hotelName}.</p>`;
-                    }
-                    contentArea.innerHTML = html;
-
-                    document.getElementById('add-room-to-hotel-btn').addEventListener('click', function() {
-                        renderAddRoomForm(hotelId, hotelName);
-                    });
-                    document.getElementById('back-to-hotels-btn').addEventListener('click', function() {
-                        mainBackground.style.backgroundImage = DEFAULT_BACKGROUND_IMAGE_URL; // Revert background
-                        loadTabContent('hotels'); // Go back to hotels list
-                    });
-
-
-                } catch (error) {
-                    contentArea.innerHTML = `<p class="text-red-400">Failed to load rooms for hotel: ${error.message}. Make sure the Flask API server is running.</p>`;
-                    console.error(`Error loading rooms for hotel ${hotelId}:`, error);
-                }
-            }
-
-
-            async function loadRooms() {
-                // Ensure dashboard background is set when switching to main rooms tab
-                mainBackground.style.backgroundImage = DEFAULT_BACKGROUND_IMAGE_URL;
-                try {
-                    const response = await fetch(`${API_BASE_URL}/rooms`);
-                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const rooms = await response.json();
-                    let html = `
-                        <h2 class="text-xl font-semibold text-gray-200 mb-4">All Available Rooms</h2>
-                        <div class="flex space-x-4 mb-4">
-                            <button id="add-room-btn" class="luxury-gold-button text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg text-sm">Add New Room</button>
-                        </div>
-                    `;
-                    if (rooms.length > 0) {
-                        html += '<ul class="list-disc pl-5 space-y-2">';
-                        rooms.forEach(room => {
-                            html += `<li class="text-gray-300"><strong>Room ${room.number}</strong> (Floor: ${room.floor}) - Hotel: ${room.hotel_name} (ID: ${room.id})</li>`;
-                        });
-                        html += '</ul>';
-                    } else {
-                        html += '<p class="text-gray-300">No rooms found.</p>';
-                    }
-                    contentArea.innerHTML = html;
-                    document.getElementById('add-room-btn').addEventListener('click', function() {
-                        renderAddRoomForm(); // Call without specific hotel context
-                    });
-
-                } catch (error) {
-                    contentArea.innerHTML = `<p class="text-red-400">Failed to load rooms: ${error.message}. Make sure the Flask API server is running at ${API_BASE_URL}.</p>`;
-                    console.error('Error loading rooms:', error);
-                }
-            }
-
-            function renderAddRoomForm(hotelId = null, hotelName = null) {
-                const title = hotelName ? `Add Room to ${hotelName}` : "Add New Room";
-                const hotelIdField = hotelId ? `
-                    <input type="hidden" id="roomHotelId" value="${hotelId}">
-                    <p class="text-gray-300 text-sm">Adding room to Hotel ID: <strong>${hotelId}</strong> (${hotelName || 'N/A'})</p>
-                ` : `
-                    <div>
-                        <label for="roomHotelId" class="block text-gray-300 text-sm font-semibold mb-2">Hotel ID</label>
-                        <input type="number" id="roomHotelId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="Enter Hotel ID for the new room">
-                    </div>
-                `;
-
-                contentArea.innerHTML = `
-                    <h2 class="text-xl font-semibold text-gray-200 mb-4">${title}</h2>
-                    <form id="add-room-form" class="space-y-4">
-                        ${hotelIdField}
-                        <div>
-                            <label for="roomNumber" class="block text-gray-300 text-sm font-semibold mb-2">Room Number</label>
-                            <input type="text" id="roomNumber" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., 101, Suite A">
-                        </div>
-                        <div>
-                            <label for="roomFloor" class="block text-gray-300 text-sm font-semibold mb-2">Floor</label>
-                            <input type="number" id="roomFloor" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., 1, 10">
-                        </div>
-                        <div id="add-room-error" class="text-red-400 text-sm text-center hidden"></div>
-                        <button type="submit" class="w-full luxury-gold-button text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:ring-opacity-75">
-                            Add Room
-                        </button>
-                        <button type="button" onclick="loadTabContent('rooms')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-md text-sm mt-2">Back to All Rooms</button>
-                    </form>
-                `;
-                document.getElementById('add-room-form').addEventListener('submit', handleAddRoomSubmit);
-            }
-
-            async function handleAddRoomSubmit(event) {
-                event.preventDefault();
-                const form = event.target;
-                const errorDiv = document.getElementById('add-room-error');
-                errorDiv.classList.add('hidden');
-
-                const hotel_id = parseInt(form.elements.roomHotelId.value);
-                const room_number = form.elements.roomNumber.value.trim();
-                const floor = parseInt(form.elements.roomFloor.value);
-
-                if (isNaN(hotel_id) || hotel_id <= 0 || !room_number || isNaN(floor)) {
-                    errorDiv.textContent = "Please fill in all room details including a valid Hotel ID.";
-                    errorDiv.classList.remove('hidden');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/rooms/add`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ hotel_id, room_number, floor })
-                    });
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                        alert(`Room '${room_number}' added successfully to Hotel ID ${hotel_id}!`);
-                        form.reset();
-                        loadTabContent('rooms'); // Refresh rooms list
-                    } else {
-                        errorDiv.textContent = result.error || "Failed to add room.";
-                        errorDiv.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    console.error('Error adding room:', error);
-                    errorDiv.textContent = "Could not connect to the server or an unknown error occurred.";
-                    errorDiv.classList.remove('hidden');
-                }
-            }
-
-
-            function renderNewBookingForm() {
-                contentArea.innerHTML = `
-                    <h2 class="text-xl font-semibold text-gray-200 mb-4">Create New Booking</h2>
-                    <form id="new-booking-form" class="space-y-4">
-                        <div>
-                            <label for="customerName" class="block text-gray-300 text-sm font-semibold mb-2">Customer Name</label>
-                            <input type="text" id="customerName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="Enter customer name">
-                        </div>
-                        <div>
-                            <label for="checkInDate" class="block text-gray-300 text-sm font-semibold mb-2">Check-In Date (YYYY-MM-DD)</label>
-                            <input type="date" id="checkInDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold">
-                        </div>
-                        <div>
-                            <label for="checkOutDate" class="block text-gray-300 text-sm font-semibold mb-2">Check-Out Date (YYYY-MM-DD)</label>
-                            <input type="date" id="checkOutDate" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold">
-                        </div>
-                        <div>
-                            <label for="roomIds" class="block text-gray-300 text-sm font-semibold mb-2">Room IDs (comma-separated)</label>
-                            <input type="text" id="roomIds" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., 1, 2, 5">
-                        </div>
-                        <div>
-                            <label for="paymentMethod" class="block text-gray-300 text-sm font-semibold mb-2">Payment Method</label>
-                            <input type="text" id="paymentMethod" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-luxury-gold" placeholder="e.g., Credit Card, Cash">
-                        </div>
-                        <div id="booking-form-error" class="text-red-400 text-sm text-center hidden"></div>
-                        <button type="submit" class="w-full luxury-gold-button text-white font-bold py-2 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-luxury-gold focus:ring-opacity-75">
-                            Create Booking
-                        </button>
-                    </form>
-                `;
-                document.getElementById('new-booking-form').addEventListener('submit', handleNewBookingSubmit);
-            }
-
-            async function handleNewBookingSubmit(event) {
-                event.preventDefault();
-                const form = event.target;
-                const errorDiv = document.getElementById('booking-form-error');
-                errorDiv.classList.add('hidden');
-
-                const customer_name = form.elements.customerName.value.trim();
-                const check_in_date = form.elements.checkInDate.value;
-                const check_out_date = form.elements.checkOutDate.value;
-                const room_ids_str = form.elements.roomIds.value.trim();
-                const payment_method = form.elements.paymentMethod.value.trim();
-
-                if (!customer_name || !check_in_date || !check_out_date || !room_ids_str || !payment_method) {
-                    errorDiv.textContent = "All fields are required.";
-                    errorDiv.classList.remove('hidden');
-                    return;
-                }
-
-                let room_ids;
-                try {
-                    room_ids = room_ids_str.split(',').map(id => {
-                        const num = parseInt(id.trim());
-                        if (isNaN(num)) throw new Error("Invalid room ID found.");
-                        return num;
-                    }).filter(num => num > 0); // Ensure positive IDs
-                    if (room_ids.length === 0) throw new Error("No valid room IDs provided.");
-                } catch (e) {
-                    errorDiv.textContent = `Invalid Room IDs: ${e.message}`;
-                    errorDiv.classList.remove('hidden');
-                    return;
-                }
-                
-                // Simple date format validation (browser type="date" handles much of this)
-                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-                if (!dateRegex.test(check_in_date) || !dateRegex.test(check_out_date)) {
-                    errorDiv.textContent = "Date format must beYYYY-MM-DD.";
-                    errorDiv.classList.remove('hidden');
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/booking/create`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            customer_name,
-                            check_in_date,
-                            check_out_date,
-                            room_ids,
-                            payment_method
-                        })
-                    });
-
-                    const result = await response.json();
-
-                    if (response.ok && result.success) {
-                        alert(`Booking successful! Booking ID: ${result.booking_id}`);
-                        form.reset(); // Clear the form
-                        // Optionally switch to view bookings tab or refresh it
-                        document.getElementById('tab-view-bookings').click();
-                    } else {
-                        errorDiv.textContent = result.error || "Failed to create booking.";
-                        errorDiv.classList.remove('hidden');
-                    }
-                } catch (error) {
-                    console.error('Error creating booking:', error);
-                    errorDiv.textContent = "Could not connect to the server (API not running?). Please try again later.";
-                    errorDiv.classList.remove('hidden');
-                }
-            }
-
-            async function loadBookings() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/bookings`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const bookings = await response.json();
-                    let html = '<h2 class="text-xl font-semibold text-gray-200 mb-4">All Bookings</h2>';
-                    if (bookings.length > 0) {
-                        html += `
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full bg-white/10 shadow-md rounded-lg overflow-hidden">
-                                    <thead class="bg-gray-700/50 border-b border-gray-600">
-                                        <tr>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Booking ID</th>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Customer Name</th>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Check-in</th>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Check-out</th>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Rooms</th>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Hotel</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                        `;
-                        bookings.forEach(booking => {
-                            html += `
-                                <tr class="border-b border-gray-700 hover:bg-black/20">
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${booking.id}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${booking.customer_name}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${booking.check_in}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${booking.check_out}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${booking.room_numbers}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${booking.hotel_name}</td>
-                                </tr>
-                            `;
-                        });
-                        html += `
-                                    </tbody>
-                                </table>
-                            </div>
-                        `;
-                    } else {
-                        html += '<p class="text-gray-300">No bookings found.</p>';
-                    }
-                    contentArea.innerHTML = html;
-                } catch (error) {
-                    contentArea.innerHTML = `<p class="text-red-400">Failed to load bookings: ${error.message}. Make sure the Flask API server is running at ${API_BASE_URL}.</p>`;
-                    console.error('Error loading bookings:', error);
-                }
-            }
-
-            async function loadPayments() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/payments`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const payments = await response.json();
-                    let html = '<h2 class="text-xl font-semibold text-gray-200 mb-4">All Payments</h2>';
-                    if (payments.length > 0) {
-                        html += `
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full bg-white/10 shadow-md rounded-lg overflow-hidden">
-                                    <thead class="bg-gray-700/50 border-b border-gray-600">
-                                        <tr>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Payment ID</th>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Booking ID</th>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Customer Name</th>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Payment Method</th>
-                                            <th class="py-3 px-4 text-left text-xs font-semibold text-gray-200 uppercase tracking-wider">Booking Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                        `;
-                        payments.forEach(payment => {
-                            html += `
-                                <tr class="border-b border-gray-700 hover:bg-black/20">
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${payment.payment_id}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${payment.booking_id}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${payment.customer_name}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${payment.payment_method}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-300">${payment.booking_date}</td>
-                                </tr>
-                            `;
-                        });
-                        html += `
-                                    </tbody>
-                                </table>
-                            </div>
-                        `;
-                    } else {
-                        html += '<p class="text-gray-300">No payments found.</p>';
-                    }
-                    contentArea.innerHTML = html;
-                } catch (error) {
-                    contentArea.innerHTML = `<p class="text-red-400">Failed to load payments: ${error.message}. Make sure the Flask API server is running at ${API_BASE_URL}.</p>`;
-                    console.error('Error loading payments:', error);
-                }
-            }
-
-
-            // Initial state for main app (hidden and scaled down)
-            mainApp.classList.add('opacity-0', 'scale-90');
-
-            // Set the "Hotels" tab as active by default on load
-            // This will also trigger the initial floating animation.
-            document.getElementById('tab-hotels').click();
-        });
-    </script>
 </body>
 </html>
